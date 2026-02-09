@@ -21,25 +21,23 @@ jobs:
     - name: Build WAR
       run: mvn clean package
 
-    - name: Copy WAR to server
+    - name: Copy WAR to EC2
       uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.SERVER_IP }}
         username: ubuntu
         key: ${{ secrets.EC2_KEY }}
-        key_format: base64
         source: "target/*.war"
-        target: "/home/${{ secrets.SERVER_USER }}/"
+        target: "/home/ubuntu/"
 
-    - name: Deploy in Tomcat
+    - name: Deploy to Tomcat
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.SERVER_IP }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SERVER_KEY }}
+        username: ubuntu
+        key: ${{ secrets.EC2_KEY }}
         script: |
-          rm -rf ~/tomcat/webapps/trainbook*
-          cp ~/target/*.war ~/tomcat/webapps/trainbook.war
-          ~/tomcat/bin/shutdown.sh || true
-          sleep 5
-          ~/tomcat/bin/startup.sh
+          sudo systemctl stop tomcat || true
+          sudo rm -rf /opt/tomcat/webapps/trainbook*
+          sudo cp /home/ubuntu/*.war /opt/tomcat/webapps/trainbook.war
+          sudo systemctl start tomcat
