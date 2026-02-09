@@ -27,6 +27,7 @@ jobs:
         host: ${{ secrets.SERVER_IP }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SERVER_KEY }}
+        key_format: base64
         source: "target/*.war"
         target: "/home/${{ secrets.SERVER_USER }}/"
 
